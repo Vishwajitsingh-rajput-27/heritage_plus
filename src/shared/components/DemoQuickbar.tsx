@@ -6,7 +6,6 @@ import { resolveMultiTierSpatialResult } from '../lib/spatialEngine';
 import { ledgerStore } from '../lib/ledgerStore';
 import { 
   ChevronDown, 
-  ChevronUp, 
   RotateCcw,
 } from 'lucide-react';
 
@@ -117,6 +116,21 @@ export const DemoQuickbar: React.FC = () => {
     }
   };
 
+  // Collapsed state: small floating action button only
+  if (!isExpanded) {
+    return (
+      <button
+        type="button"
+        onClick={() => setIsExpanded(true)}
+        aria-label="Expand Evaluator Simulation Quickbar"
+        title="Evaluator Simulation Quickbar"
+        className="fixed bottom-4 right-4 z-40 w-11 h-11 rounded-full bg-surface-card/95 backdrop-blur-md border border-border-subtle shadow-lg ring-1 ring-border-subtle/50 flex items-center justify-center text-primary hover:bg-primary/10 hover:scale-105 active:scale-95 transition-all duration-200 print:hidden"
+      >
+        <span className="material-symbols-outlined text-[20px]">science</span>
+      </button>
+    );
+  }
+
   return (
     <aside
       aria-label="Simulation Quickbar"
@@ -148,15 +162,15 @@ export const DemoQuickbar: React.FC = () => {
             </span>
             <button
               type="button"
-              aria-label={isExpanded ? 'Collapse Simulation Quickbar' : 'Expand Simulation Quickbar'}
+              aria-label="Collapse Simulation Quickbar"
               className="text-text-muted hover:text-text-primary p-1"
             >
-              {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+              <ChevronDown className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        {/* Quick Action Strip (Always visible or in compact mode) */}
+        {/* Quick Action Strip */}
         <div className="p-3 bg-surface-card flex flex-wrap items-center justify-between gap-2 border-b border-border-subtle/60 text-xs">
           <div className="flex items-center gap-2 flex-wrap">
             <button
@@ -181,16 +195,14 @@ export const DemoQuickbar: React.FC = () => {
           <button
             type="button"
             onClick={handleReset}
-            aria-label={isExpanded ? 'Collapse Demo Switcher' : 'Expand Demo Switcher'}
             className="text-[11px] text-text-muted hover:text-text-primary px-2 py-1 transition font-medium cursor-pointer"
           >
             Reset
           </button>
         </div>
 
-        {/* Expanded 4 Scenario Pills */}
-        {isExpanded && (
-          <div className="p-3 bg-surface-well/40 space-y-2 animate-in fade-in duration-200">
+        {/* Scenario Pills */}
+        <div className="p-3 bg-surface-well/40 space-y-2 animate-in fade-in duration-200">
             <div className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
               Select Pre-Calibrated Spatial Scenario
             </div>
@@ -255,8 +267,7 @@ export const DemoQuickbar: React.FC = () => {
                 ✓ {resetToast}
               </div>
             )}
-          </div>
-        )}
+        </div>
       </div>
     </aside>
   );
