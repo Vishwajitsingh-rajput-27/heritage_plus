@@ -12,5 +12,7 @@ export { EmptyState } from './EmptyState';
 export { Skeleton, CardSkeleton } from './LoadingSkeleton';
 export { MapLibreView } from './MapLibreView';
 export { ShivneriPolygonMap } from './ShivneriPolygonMap';
+export { LocationPreviewMap } from './LocationPreviewMap';
+export { WorkflowSteps } from './WorkflowSteps';
 export { DemoQuickbar } from './DemoQuickbar';
 export { NationalEmblem } from './NationalEmblem';

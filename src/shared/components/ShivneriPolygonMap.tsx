@@ -42,6 +42,10 @@ export const ShivneriPolygonMap: React.FC<ShivneriPolygonMapProps> = ({
   const [svgZoom, setSvgZoom] = useState(1);
   const [svgPan, setSvgPan] = useState({ x: 0, y: 0 });
 
+  // Zone legend is collapsed by default so it doesn't cover the map;
+  // the user can open it only when they want to check what each color means.
+  const [legendOpen, setLegendOpen] = useState(false);
+
   // Get active cases from ledgerStore
   const activeCases: ObservationRecord[] = useMemo(() => {
     return ledgerStore.getCases().filter((c) => c.latitude && c.longitude);
@@ -586,35 +590,66 @@ export const ShivneriPolygonMap: React.FC<ShivneriPolygonMapProps> = ({
           </div>
         )}
 
-        {/* Floating 3-Zone Explicit Color Legend (Requested by User) */}
-        <div className="absolute bottom-3 left-3 right-3 sm:right-auto bg-white/95 backdrop-blur-xs p-3 rounded-xl border border-border-subtle shadow-md z-20 flex flex-wrap items-center gap-4 text-xs">
-          <div className="flex items-center gap-2">
-            <span className="w-3.5 h-3.5 rounded-full bg-red-600 border border-white shadow-2xs"></span>
-            <div>
-              <span className="font-bold text-red-700 block leading-tight">Red — Protected Zone</span>
-              <span className="text-[10px] text-text-muted">Prohibited 0–100m · Non-Development</span>
+        {/* Collapsible Zone Legend — hidden by default, opens only when the user asks for it */}
+        <div className="absolute bottom-3 left-3 z-20">
+          {legendOpen && (
+            <div className="mb-2 bg-white/95 backdrop-blur-xs p-3.5 rounded-xl border border-border-subtle shadow-lg w-[260px] sm:w-[300px] space-y-2.5 text-xs animate-in fade-in slide-in-from-bottom-2 duration-150">
+              <div className="flex items-center justify-between pb-1.5 border-b border-border-subtle">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-text-secondary">
+                  What do the zones mean?
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setLegendOpen(false)}
+                  className="text-text-muted hover:text-text-primary cursor-pointer"
+                  aria-label="Close legend"
+                >
+                  <span className="material-symbols-outlined text-[16px]">close</span>
+                </button>
+              </div>
+
+              <div className="flex items-start gap-2">
+                <span className="w-3.5 h-3.5 rounded-full bg-red-600 border border-white shadow-2xs mt-0.5 shrink-0"></span>
+                <div>
+                  <span className="font-bold text-red-700 block leading-tight">Red — Protected Zone</span>
+                  <span className="text-[10px] text-text-muted">Prohibited 0–100m · Non-Development</span>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2">
+                <span className="w-3.5 h-3.5 rounded-full bg-amber-500 border border-white shadow-2xs mt-0.5 shrink-0"></span>
+                <div>
+                  <span className="font-bold text-amber-800 block leading-tight">Yellow — Neutral Zone</span>
+                  <span className="text-[10px] text-text-muted">Buffer 100–300m · NMA Clearance</span>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2">
+                <span className="w-3.5 h-3.5 rounded-full bg-emerald-600 border border-white shadow-2xs mt-0.5 shrink-0"></span>
+                <div>
+                  <span className="font-bold text-emerald-700 block leading-tight">Green — Permitted Zone</span>
+                  <span className="text-[10px] text-text-muted">&gt;300m · Activities Permitted</span>
+                </div>
+              </div>
             </div>
-          </div>
+          )}
 
-          <div className="h-4 w-px bg-border-subtle hidden sm:block"></div>
-
-          <div className="flex items-center gap-2">
-            <span className="w-3.5 h-3.5 rounded-full bg-amber-500 border border-white shadow-2xs"></span>
-            <div>
-              <span className="font-bold text-amber-800 block leading-tight">Yellow — Neutral Zone</span>
-              <span className="text-[10px] text-text-muted">Buffer 100–300m · NMA Clearance</span>
-            </div>
-          </div>
-
-          <div className="h-4 w-px bg-border-subtle hidden sm:block"></div>
-
-          <div className="flex items-center gap-2">
-            <span className="w-3.5 h-3.5 rounded-full bg-emerald-600 border border-white shadow-2xs"></span>
-            <div>
-              <span className="font-bold text-emerald-700 block leading-tight">Green — Permitted Zone</span>
-              <span className="text-[10px] text-text-muted">&gt;300m · Activities Permitted</span>
-            </div>
-          </div>
+          <button
+            type="button"
+            onClick={() => setLegendOpen((prev) => !prev)}
+            className="flex items-center gap-1.5 bg-white/95 backdrop-blur-xs px-3 py-2 rounded-xl border border-border-subtle shadow-md text-xs font-semibold text-text-primary hover:bg-white transition cursor-pointer"
+            aria-expanded={legendOpen}
+          >
+            <span className="flex -space-x-1">
+              <span className="w-2.5 h-2.5 rounded-full bg-red-600 border border-white"></span>
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-500 border border-white"></span>
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 border border-white"></span>
+            </span>
+            <span>Zone Legend</span>
+            <span className="material-symbols-outlined text-[16px] text-text-secondary">
+              {legendOpen ? 'expand_more' : 'expand_less'}
+            </span>
+          </button>
         </div>
 
         {/* Compass Rose Badge */}

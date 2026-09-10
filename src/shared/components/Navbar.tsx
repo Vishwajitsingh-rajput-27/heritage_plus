@@ -1,6 +1,7 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { NationalEmblem } from './NationalEmblem';
+import { getVisitorSession, clearVisitorSession } from '../../features/auth/authSession';
 import {
   Menu,
   X,
@@ -12,17 +13,31 @@ import {
   Compass,
   Users,
   BookOpen,
-  HelpCircle
+  HelpCircle,
+  LogOut,
 } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const [visitorName, setVisitorName] = React.useState<string | null>(() => getVisitorSession()?.name ?? null);
+
+  React.useEffect(() => {
+    // Re-check on route change since login happens on a different route.
+    setVisitorName(getVisitorSession()?.name ?? null);
+  }, [location.pathname]);
+
+  const handleLogout = () => {
+    clearVisitorSession();
+    setVisitorName(null);
+    navigate('/login');
+  };
 
   const mainNavLinks = [
-    { to: '/site', label: 'Site Context', icon: MapPin },
-    { to: '/capture', label: 'Field Capture', icon: PlusCircle },
-    { to: '/ledger', label: 'Change Ledger', icon: History },
+    { to: '/site', label: 'Map', icon: MapPin },
+    { to: '/capture', label: 'Report an Issue', icon: PlusCircle },
+    { to: '/ledger', label: 'My Reports', icon: History },
     { to: '/reviewer/queue', label: 'Reviewer Queue', icon: Inbox },
     { to: '/reviewer/console', label: 'Curator Console', icon: Sliders },
   ];
@@ -112,12 +127,32 @@ export const Navbar: React.FC = () => {
             </span>
           </div>
 
-          <div
-            className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs border border-primary/20 cursor-default"
-            title="Active Desk: Conservation Curator"
-          >
-            CC
-          </div>
+          {visitorName ? (
+            <div className="hidden sm:flex items-center gap-2">
+              <div
+                className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs border border-primary/20 cursor-default"
+                title={`Logged in as ${visitorName}`}
+              >
+                {visitorName.slice(0, 2).toUpperCase()}
+              </div>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="p-2 rounded-xl text-text-muted hover:text-primary hover:bg-primary/5 transition-colors"
+                title="Log out"
+                aria-label="Log out"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            </div>
+          ) : (
+            <div
+              className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs border border-primary/20 cursor-default"
+              title="Active Desk: Conservation Curator"
+            >
+              CC
+            </div>
+          )}
 
           {/* Mobile Menu Toggle */}
           <div className="flex lg:hidden items-center">

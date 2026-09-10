@@ -5,10 +5,34 @@ import { DEMO_SCENARIOS } from '../../shared/mock-data/mockScenarios';
 import { PROVENANCE_METADATA } from '../../shared/mock-data/siteGeometry';
 import { ledgerStore } from '../../shared/lib/ledgerStore';
 import { ShivneriPolygonMap } from '../../shared/components/ShivneriPolygonMap';
-import { Play } from 'lucide-react';
+import { WorkflowSteps } from '../../shared/components/WorkflowSteps';
+import { getVisitorSession } from '../auth/authSession';
+import { Play, X, MapPinned, Camera, CheckCircle2 } from 'lucide-react';
+
+const FIRST_VISIT_KEY = 'hp_seen_welcome_tip';
 
 export const SiteContextPage: React.FC = () => {
   const [highlightedCaseId, setHighlightedCaseId] = useState<string | null>(null);
+  const visitorName = getVisitorSession()?.name;
+
+  // Show a short, dismissible "how this works" tip the very first time a
+  // visitor lands on the map, so first-time users aren't left guessing.
+  const [showWelcomeTip, setShowWelcomeTip] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem(FIRST_VISIT_KEY) !== 'true';
+    } catch {
+      return true;
+    }
+  });
+
+  const dismissWelcomeTip = () => {
+    setShowWelcomeTip(false);
+    try {
+      localStorage.setItem(FIRST_VISIT_KEY, 'true');
+    } catch {
+      // ignore storage errors (e.g. private browsing)
+    }
+  };
 
   // Modals state
   const [statutoryModalOpen, setStatutoryModalOpen] = useState(false);
@@ -54,19 +78,52 @@ export const SiteContextPage: React.FC = () => {
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10 space-y-8 font-sans">
+      <WorkflowSteps current="explore" />
+
+      {/* First-time visitor welcome tip — shown once, dismissible */}
+      {showWelcomeTip && (
+        <div className="bg-primary-surface border border-primary-border rounded-2xl p-5 relative">
+          <button
+            type="button"
+            onClick={dismissWelcomeTip}
+            className="absolute top-3 right-3 text-primary/70 hover:text-primary p-1 rounded-lg hover:bg-white/50 cursor-pointer"
+            aria-label="Dismiss welcome tip"
+          >
+            <X className="w-4 h-4" />
+          </button>
+          <h2 className="text-sm font-bold text-primary mb-3 pr-6">
+            {visitorName ? `Welcome, ${visitorName}!` : 'Welcome!'} Here's how this works:
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="flex items-center gap-2.5 bg-white/70 rounded-xl p-3">
+              <MapPinned className="w-4 h-4 text-primary shrink-0" />
+              <span className="text-xs text-text-secondary">Check the map below to see which areas are protected.</span>
+            </div>
+            <div className="flex items-center gap-2.5 bg-white/70 rounded-xl p-3">
+              <Camera className="w-4 h-4 text-primary shrink-0" />
+              <span className="text-xs text-text-secondary">Noticed something? Tap "Report an Issue" to log it.</span>
+            </div>
+            <div className="flex items-center gap-2.5 bg-white/70 rounded-xl p-3">
+              <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
+              <span className="text-xs text-text-secondary">You'll get instant confirmation and can track it anytime.</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Top Action & Title Bar */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-surface-card p-6 lg:p-8 rounded-2xl border border-border-subtle shadow-xs">
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-primary text-xs font-bold uppercase tracking-wider">
             <span className="material-symbols-outlined text-[18px]">account_balance</span>
-            <span>Statutory Protection & Spatial Context · ASI Ref: MUMMH015</span>
+            <span>Protected Heritage Site · ASI Ref: MUMMH015</span>
           </div>
           <h1 className="text-2xl lg:text-3xl font-bold text-text-primary tracking-tight font-sans">
             {SHIVNERI_SITE.name}
           </h1>
           <p className="text-sm text-text-secondary max-w-2xl leading-relaxed">
-            {SHIVNERI_SITE.vernacularName} · {SHIVNERI_SITE.district}, {SHIVNERI_SITE.state}. Real-time perimeter
-            surveillance and statutory compliance monitoring adhering to AMASR Act conservation guidelines.
+            {SHIVNERI_SITE.vernacularName} · {SHIVNERI_SITE.district}, {SHIVNERI_SITE.state}. Use the map to see
+            which areas are protected, and report anything unusual you notice nearby.
           </p>
         </div>
 

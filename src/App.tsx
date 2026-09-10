@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Navbar, Footer, DemoQuickbar } from './shared/components';
 import { SiteContextPage } from './features/site-context/SiteContextPage';
 import { FieldCapturePage } from './features/field-capture/FieldCapturePage';
+import { ObservationConfirmationPage } from './features/field-capture/ObservationConfirmationPage';
 import { SpatialResultPage } from './features/spatial-result/SpatialResultPage';
 import { ChangeLedgerPage } from './features/change-ledger/ChangeLedgerPage';
 import { CaseDetailPage } from './features/spatial-result/CaseDetailPage';
@@ -11,6 +12,8 @@ import { ReviewerPacketPreview } from './features/reviewer-packet';
 import { TeamStatusPage } from './features/team-status/TeamStatusPage';
 import { PsFitPage } from './features/ps-fit/PsFitPage';
 import { JudgeQaPage } from './features/judge-qa/JudgeQaPage';
+import { LoginPage } from './features/auth/LoginPage';
+import { VisitorAuthGate } from './features/auth/VisitorAuthGate';
 import { ShieldCheck } from 'lucide-react';
 
 const ReviewerRoleGate: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -67,15 +70,22 @@ export const App: React.FC = () => {
         <Navbar />
         <main className="flex-1 w-full print:p-0 print:m-0 print:max-w-none">
           <Routes>
-            <Route path="/" element={<Navigate to="/site" replace />} />
-            <Route path="/site" element={<SiteContextPage />} />
-            <Route path="/capture" element={<div className="max-w-2xl mx-auto px-4 sm:px-6 py-8"><FieldCapturePage /></div>} />
-            <Route path="/result" element={<div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8"><SpatialResultPage /></div>} />
-            <Route path="/result/:caseId" element={<div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8"><SpatialResultPage /></div>} />
-            <Route path="/spatial-demo" element={<div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8"><SpatialResultPage /></div>} />
-            <Route path="/ledger" element={<div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8"><ChangeLedgerPage /></div>} />
-            <Route path="/case/:caseId" element={<div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8"><CaseDetailPage /></div>} />
-            <Route path="/cases/:caseId" element={<div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8"><CaseDetailPage /></div>} />
+            <Route path="/login" element={<LoginPage />} />
+
+            {/* Tourist / visitor reporting flow — requires a (simulated) login first */}
+            <Route element={<VisitorAuthGate />}>
+              <Route path="/" element={<Navigate to="/site" replace />} />
+              <Route path="/site" element={<SiteContextPage />} />
+              <Route path="/capture" element={<div className="max-w-2xl mx-auto px-4 sm:px-6 py-8"><FieldCapturePage /></div>} />
+              <Route path="/thank-you/:caseId" element={<ObservationConfirmationPage />} />
+              <Route path="/result" element={<div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8"><SpatialResultPage /></div>} />
+              <Route path="/result/:caseId" element={<div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8"><SpatialResultPage /></div>} />
+              <Route path="/spatial-demo" element={<div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8"><SpatialResultPage /></div>} />
+              <Route path="/ledger" element={<div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8"><ChangeLedgerPage /></div>} />
+              <Route path="/case/:caseId" element={<div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8"><CaseDetailPage /></div>} />
+              <Route path="/cases/:caseId" element={<div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8"><CaseDetailPage /></div>} />
+            </Route>
+
             <Route path="/reviewer" element={<ReviewerRoleGate><ReviewerQueuePage /></ReviewerRoleGate>} />
             <Route path="/reviewer/queue" element={<ReviewerRoleGate><ReviewerQueuePage /></ReviewerRoleGate>} />
             <Route path="/reviewer/console" element={<ReviewerRoleGate><ReviewerConsolePage /></ReviewerRoleGate>} />

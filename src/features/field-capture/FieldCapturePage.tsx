@@ -15,6 +15,8 @@ import {
   PhotoDropzone,
   NoticeBanner,
   Badge,
+  WorkflowSteps,
+  LocationPreviewMap,
 } from '../../shared/components';
 import { PhotoMetadata } from '../../shared/components/PhotoDropzone';
 import { GpsAccuracyHud } from './GpsAccuracyHud';
@@ -177,8 +179,8 @@ export const FieldCapturePage: React.FC = () => {
         spatialResult
       );
 
-      // 3. Navigate directly to result view with stable Case ID
-      navigate(`/result/${newCase.caseId}`);
+      // 3. Navigate to the plain-language confirmation screen with stable Case ID
+      navigate(`/thank-you/${newCase.caseId}`);
     } catch (err: any) {
       console.error('Failed to register ledger case:', err);
       setSubmitError(`Failed to persist observation to Change Ledger: ${err?.message || 'Storage error'}. Please retry.`);
@@ -189,24 +191,27 @@ export const FieldCapturePage: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      <WorkflowSteps current="report" />
+
       {/* Site Header Context */}
       <div className="flex items-center justify-between pb-4 border-b border-border-subtle">
         <Link to="/site" className="text-xs text-text-secondary hover:text-primary flex items-center gap-1.5 transition-colors font-medium">
           <ArrowLeft className="w-3.5 h-3.5" />
-          Back to Site Context
+          Back to Map
         </Link>
-        <Badge variant="blue">Shivneri Fort Field Studio</Badge>
+        <Badge variant="blue">{SHIVNERI_SITE.name}</Badge>
       </div>
 
       <div>
         <span className="text-xs font-semibold text-primary uppercase tracking-wider font-mono">
-          Field Evidence Capture
+          Report Something You Noticed
         </span>
         <h1 className="text-xl sm:text-2xl font-bold text-primary mt-1 font-sans">
           {SHIVNERI_SITE.name}
         </h1>
         <p className="text-xs text-text-secondary mt-1">
-          Record a factual, time-stamped observation near {SHIVNERI_SITE.name} (MUMMH015).
+          It only takes 4 quick steps: share your location, pick a category, add a photo, and describe what
+          you saw.
         </p>
       </div>
 
@@ -240,11 +245,11 @@ export const FieldCapturePage: React.FC = () => {
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <label className="text-xs font-semibold text-secondary uppercase tracking-wider font-mono">
-              1. Location &amp; Uncertainty Telemetry <span className="text-primary">*</span>
+              1. Your Location <span className="text-primary">*</span>
             </label>
             {isGpsAcquired && (
               <span className="text-xs text-zone-survey font-medium flex items-center gap-1">
-                <CheckCircle2 className="w-3.5 h-3.5" /> Sensor Active
+                <CheckCircle2 className="w-3.5 h-3.5" /> Location found
               </span>
             )}
           </div>
@@ -257,6 +262,21 @@ export const FieldCapturePage: React.FC = () => {
               onRefresh={handleGetLocation}
               isSimulated={!isGpsAcquired}
             />
+
+            {isGpsAcquired && (
+              <div className="space-y-1.5">
+                <span className="text-[11px] font-semibold text-text-secondary flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-[14px] text-primary">map</span>
+                  Here's your location on the map
+                </span>
+                <LocationPreviewMap
+                  latitude={coordinates[1]}
+                  longitude={coordinates[0]}
+                  accuracyMeters={accuracyMeters}
+                  className="h-[200px] w-full"
+                />
+              </div>
+            )}
 
             {!isGpsAcquired && (
               <button
@@ -273,7 +293,7 @@ export const FieldCapturePage: React.FC = () => {
                 ) : (
                   <>
                     <Navigation className="w-4 h-4 text-primary" />
-                    <span>Acquire Live Device GPS Coordinates</span>
+                    <span>Share My Current Location</span>
                   </>
                 )}
               </button>
@@ -303,7 +323,7 @@ export const FieldCapturePage: React.FC = () => {
         {/* Step 2: Category Selector */}
         <div className="space-y-2">
           <label className="text-xs font-semibold text-secondary uppercase tracking-wider font-mono">
-            2. Visible Change Category <span className="text-primary">*</span>
+            2. What Did You Notice? <span className="text-primary">*</span>
           </label>
           <CategorySelector
             selectedCategoryId={categoryId}
@@ -333,7 +353,7 @@ export const FieldCapturePage: React.FC = () => {
         {/* Step 3: Photo Upload Dropzone */}
         <div className="space-y-2">
           <label className="text-xs font-semibold text-secondary uppercase tracking-wider font-mono">
-            3. Photographic Evidence
+            3. Add a Photo
           </label>
           <PhotoDropzone
             onPhotoSelected={(meta) => setPhoto(meta)}
@@ -345,9 +365,9 @@ export const FieldCapturePage: React.FC = () => {
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <label htmlFor="description" className="text-xs font-semibold text-secondary uppercase tracking-wider font-mono">
-              4. Factual Observation Notes <span className="text-primary">*</span>
+              4. Describe What You Saw <span className="text-primary">*</span>
             </label>
-            <span className="text-[10px] text-text-muted">Neutral physical description</span>
+            <span className="text-[10px] text-text-muted">Just the facts — no need for opinions</span>
           </div>
 
           <textarea
@@ -378,12 +398,12 @@ export const FieldCapturePage: React.FC = () => {
           {isSubmitting ? (
             <>
               <Loader2 className="w-4 h-4 animate-spin" />
-              <span>Evaluating Multi-Tier Buffer Layers &amp; Logging Case...</span>
+              <span>Submitting your report...</span>
             </>
           ) : (
             <>
               <Send className="w-4 h-4" />
-              <span>Record Observation to Change Ledger</span>
+              <span>Submit Report</span>
             </>
           )}
         </button>
